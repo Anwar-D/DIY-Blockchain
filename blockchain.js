@@ -70,9 +70,14 @@ this.nonce=0;
    */
   calculateHash(nonce) {
     // Your code here
-Block.nonce;
-Block.previousHash
-  }
+    
+      const transactionString = this.transactions
+        .map((block) => block.signature)
+        .toString();
+      const hashing = this.previousHash + transactionString + nonce;
+      this.nonce = nonce;
+      this.hash = createHash("sha512").update(hashing).digest("hex");
+    }
 }
 
 /**
@@ -91,15 +96,20 @@ class Blockchain {
    */
   constructor() {
     // Your code here
-
+    const chain = [];
+    
+    const genesisBlock = new Block(chain, null);
+    this.blocks = [genesisBlock];
   }
+  
 
   /**
    * Simply returns the last block added to the chain.
    */
   getHeadBlock() {
     // Your code here
-
+    const last_block= this.blocks.length-1;
+    return this.blocks[last_block];
   }
 
   /**
@@ -108,7 +118,8 @@ class Blockchain {
    */
   addBlock(transactions) {
     // Your code here
-
+    const block = new Block(transactions, this.getHeadBlock().hash);
+    this.blocks.push(block);
   }
 
   /**
