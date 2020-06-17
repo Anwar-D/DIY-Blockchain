@@ -1,6 +1,6 @@
 'use strict';
 
-const { createHash } = require('crypto');
+const { createHash, sign } = require('crypto');
 const signing = require('./signing');
 
 
@@ -23,9 +23,17 @@ class Transaction {
    */
   constructor(privateKey, recipient, amount) {
     // Enter your solution here
-
+    
+    
+      this.source = signing.getPublicKey(privateKey);
+      this.recipient = recipient;
+      this.amount = amount;
+      this.signature = signing.sign(
+                  privateKey ,
+                   this.source + this.recipient + this.amount
+      );
+    }
   }
-}
 
 /**
  * A Block class for storing an array of transactions and the hash of a
@@ -45,7 +53,10 @@ class Block {
    */
   constructor(transactions, previousHash) {
     // Your code here
+this.transactions= transactions;
+this.previousHash=previousHash;
 
+this.nonce=0;
   }
 
   /**
@@ -59,7 +70,8 @@ class Block {
    */
   calculateHash(nonce) {
     // Your code here
-
+Block.nonce;
+Block.previousHash
   }
 }
 
