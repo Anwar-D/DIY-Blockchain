@@ -57,6 +57,7 @@ this.transactions= transactions;
 this.previousHash=previousHash;
 
 this.nonce=0;
+this.calculateHash(this.nonce);
   }
 
   /**

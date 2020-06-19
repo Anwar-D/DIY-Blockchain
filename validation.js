@@ -1,7 +1,7 @@
-'use strict';
+"use strict";
 
-const { createHash } = require('crypto');
-const signing = require('./signing');
+const { createHash } = require("crypto");
+const signing = require("./signing");
 
 /**
  * A simple validation function for transactions. Accepts a transaction
@@ -21,10 +21,6 @@ const isValidTransaction = (transaction) => {
     else
     return signing.verify(transaction.source, toSign, transaction.signature);
 };
-      
-    
-
-
 
 /**
  * Validation function for blocks. Accepts a block and returns true or false.
@@ -32,28 +28,16 @@ const isValidTransaction = (transaction) => {
  *   - their hash or any other properties were altered
  *   - they contain any invalid transactions
  */
-const isValidBlock = (blockchain) => {
-  // Your code here
-  if (!blockchain.genesisBlock) 
-  return false;
-  return true;
-
- /** transaction.source = signing.getPublicKey(signing.createPrivateKey());
-  return validation.isValidTransaction(transaction);
-  //const T= block.signature.verify(nonce.previousHash);
-  //const TT =block.previousHash;
-
-  const transactionString = block.transactions.map(t => t.signature).join('');
+const isValidBlock = (block) => {
+  const transactionString = block.transactions.map((t) => t.signature).toString();
   const toHash = block.previousHash + transactionString + block.nonce;
-//3) should return false when tampering with calculateHash
 
+  if (block.hash !== createHash("sha512").update(toHash).digest("hex")) {
+    return false;
+  }
 
-  if (block.hash !== createHash('sha512').update(toHash).digest('hex')) {
-    return false;}
-    
-  return block.transactions.every(isValidTransaction);**/
-  
-
+  if (!block.transactions.every(isValidTransaction)) return false;
+  return true;
 };
 
 /**
@@ -66,42 +50,42 @@ const isValidBlock = (blockchain) => {
  *   - contains any invalid blocks
  *   - contains any invalid transactions
  */
-const isValidChain = blockchain => {
-  // Your code here
-  const { blocks } = blockchain;
 
-  if (blocks[0].previousHash !== null) {
-    return false;
-  }
-  if (blocks.slice(1).some((b, i) => b.previousHash !== blocks[i].hash)) {
-    return false;
-  }
-
-  if (blocks.some(b => !isValidBlock(b))) {
+/**  if (!blockchain.genesisBlock) return false;
+  if (!isValidBlock(blockchain.blocks)) return false;
+  return blocks.map((b) => b.transactions).every(isValidTransaction); **/
+const isValidChain = (blockchain) => {
+  if (blockchain.blocks[0].previousHash !== null) {
     return false;
   }
 
-  return blocks
-    .map(b => b.transactions)
-    .reduce((flat, txns) => flat.concat(txns), [])
+  for (let i = 1; i < blockchain.blocks.length; i++) {
+    if (blockchain.blocks[i].previousHash !== blockchain.blocks[i - 1].hash)
+      return false;
+  }
+
+  for (let i = 1; i < blockchain.blocks.length; i++) {
+    if (!isValidBlock(blockchain.blocks[i])) return false;
+  }
+
+  return blockchain.blocks
+    .map((b) => b.transactions)
+    .reduce((flat, t) => flat.concat(t), [])
     .every(isValidTransaction);
 };
-
-
 
 /**
  * This last one is just for fun. Become a hacker and tamper with the passed in
  * blockchain, mutating it for your own nefarious purposes. This should
  * (in theory) make the blockchain fail later validation checks;
  */
-const breakChain = blockchain => {
-  // Your code here
-
+const breakChain = (blockchain) => {
+  blockchain.blocks[1].transactions[0].amount = 576579;
 };
 
 module.exports = {
   isValidTransaction,
   isValidBlock,
   isValidChain,
-  breakChain
+  breakChain,
 };
