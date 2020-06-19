@@ -10,10 +10,21 @@ const signing = require('./signing');
  *   - were improperly signed
  *   - have been modified since signing
  */
-const isValidTransaction = transaction => {
+const isValidTransaction = (transaction) => {
   // Enter your solution here
-
+  const  toSign = transaction.source
+                + transaction.recipient
+                 + transaction.amount;
+                 
+    if (transaction.amount < 0) 
+      return false;
+    else
+    return signing.verify(transaction.source, toSign, transaction.signature);
 };
+      
+    
+
+
 
 /**
  * Validation function for blocks. Accepts a block and returns true or false.
@@ -21,8 +32,27 @@ const isValidTransaction = transaction => {
  *   - their hash or any other properties were altered
  *   - they contain any invalid transactions
  */
-const isValidBlock = block => {
+const isValidBlock = (blockchain) => {
   // Your code here
+  if (!blockchain.genesisBlock) 
+  return false;
+  return true;
+
+ /** transaction.source = signing.getPublicKey(signing.createPrivateKey());
+  return validation.isValidTransaction(transaction);
+  //const T= block.signature.verify(nonce.previousHash);
+  //const TT =block.previousHash;
+
+  const transactionString = block.transactions.map(t => t.signature).join('');
+  const toHash = block.previousHash + transactionString + block.nonce;
+//3) should return false when tampering with calculateHash
+
+
+  if (block.hash !== createHash('sha512').update(toHash).digest('hex')) {
+    return false;}
+    
+  return block.transactions.every(isValidTransaction);**/
+  
 
 };
 
@@ -38,8 +68,26 @@ const isValidBlock = block => {
  */
 const isValidChain = blockchain => {
   // Your code here
+  const { blocks } = blockchain;
 
+  if (blocks[0].previousHash !== null) {
+    return false;
+  }
+  if (blocks.slice(1).some((b, i) => b.previousHash !== blocks[i].hash)) {
+    return false;
+  }
+
+  if (blocks.some(b => !isValidBlock(b))) {
+    return false;
+  }
+
+  return blocks
+    .map(b => b.transactions)
+    .reduce((flat, txns) => flat.concat(txns), [])
+    .every(isValidTransaction);
 };
+
+
 
 /**
  * This last one is just for fun. Become a hacker and tamper with the passed in
